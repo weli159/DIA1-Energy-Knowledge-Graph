@@ -86,7 +86,5 @@ python src/kge/train_kge.py
 - **Inferred Facts (Reasoning)**: 438
 - **KGE Accuracy (RotatE)**: 0.256 MRR
 
----
 
-## 📸 Demo Screenshot
-![RAG UI Demo](file:///C:/Users/user/.gemini/antigravity/brain/cba80c68-1819-4772-9851-58bee5c0da84/final_ui_success_verified.png)
+
