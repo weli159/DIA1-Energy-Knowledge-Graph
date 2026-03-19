@@ -1,0 +1,30 @@
+  http://private.org/energy/entity/08D_Sussman
+    1. http://private.org/energy/entity/the_IRENA_Assembly  (cos=0.683)
+    2. http://private.org/energy/entity/W_m2  (cos=0.655)
+    3. http://private.org/energy/entity/Cerro_Prieto  (cos=0.638)
+    4. http://private.org/energy/entity/Dasandi  (cos=0.638)
+    5. http://private.org/energy/entity/farms_3_Bioenergy  (cos=0.636)
+  http://private.org/energy/entity/100_300_Years
+    1. http://private.org/energy/entity/beginning_of_end  (cos=0.720)
+    2. http://private.org/energy/entity/20_March_2024  (cos=0.703)
+    3. http://private.org/energy/entity/the_winter  (cos=0.701)
+    4. http://private.org/energy/entity/16_May_2021  (cos=0.687)
+    5. http://private.org/energy/entity/January_26_2009  (cos=0.685)
+  http://private.org/energy/entity/100_PWh_year
+    1. http://private.org/energy/entity/20_June_2019  (cos=0.731)
+    2. http://private.org/energy/entity/17_November_2019  (cos=0.651)
+    3. http://private.org/energy/entity/11_December_2008  (cos=0.635)
+    4. http://private.org/energy/entity/20_January_2023  (cos=0.612)
+    5. http://private.org/energy/entity/12_October_2009  (cos=0.607)
+  http://private.org/energy/entity/10_11_June_2015
+    1. http://private.org/energy/entity/24_November_2009  (cos=0.692)
+    2. http://private.org/energy/entity/December_2_2012  (cos=0.686)
+    3. http://private.org/energy/entity/12_July_2022  (cos=0.669)
+    4. http://private.org/energy/entity/30_October_2009  (cos=0.642)
+    5. http://private.org/energy/entity/1st_ed_2025  (cos=0.641)
+  http://private.org/energy/entity/10_2095S_doi_10_1038
+    1. http://private.org/energy/entity/United_Nations_Climate_Chan  (cos=0.576)
+    2. http://private.org/energy/entity/O_A_Schoenung  (cos=0.562)
+    3. http://private.org/energy/entity/Taylor_Francis  (cos=0.482)
+    4. http://private.org/energy/entity/Buehler_Ralph  (cos=0.461)
+    5. http://private.org/energy/entity/The_New_York_Review_of_Book  (cos=0.455)

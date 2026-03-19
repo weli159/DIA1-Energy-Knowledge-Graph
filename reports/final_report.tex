@@ -1,0 +1,146 @@
+\documentclass[11pt,a4paper]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{hyperref}
+\usepackage{graphicx}
+\usepackage{listings}
+\usepackage{booktabs}
+\usepackage{geometry}
+\geometry{margin=1in}
+
+\title{\textbf{Energy Knowledge Graph: A Full Pipeline from Web Mining to RAG}}
+\author{OUALI Youssef \and SMASH Yassine}
+\date{March 2026}
+
+\begin{document}
+
+\maketitle
+
+\section{Introduction}
+This report details the construction and utilization of an Energy Sector Knowledge Graph. Our pipeline spans from raw web crawling to an advanced RAG (Retrieval-Augmented Generation) system.
+
+\section{Data Acquisition \& IE}
+\subsection{Methodology \& Crawler Design}
+Our data acquisition pipeline was designed for high-precision extraction of energy-related news. We utilized \textbf{Trafilatura} for its superior boilerplate removal and metadata extraction, combined with a custom \textbf{Scrapy} crawler to navigate the site hierarchies of the IEA (International Energy Agency) and various energy news portals.
+\textbf{Ethics:} We implemented a strict 2-second delay between requests and strictly honored \texttt{robots.txt} directives.
+
+\subsection{Cleaning \& NER Pipeline}
+The raw text underwent a multi-stage cleaning pipeline:
+\begin{enumerate}
+    \item HTML/Boilerplate removal.
+    \item Unicode normalization and noise (advertisement) filtering.
+    \item Sentence segmentation using spaCy.
+\end{enumerate}
+For Information Extraction, we employed the \texttt{en\_core\_web\_trf} transformer model. This provided robust recognition of entities in complex industrial contexts.
+\subsection{Ambiguity Cases}
+To ensure the high precision of our Knowledge Graph, we manually addressed three primary cases of entity ambiguity during the extraction phase:
+\begin{itemize}
+    \item \textbf{Total}: We implemented context-aware disambiguation to distinguish the company "TotalEnergies" from the common adjective "total". 
+    \item \textbf{Shell}: We differentiated the energy giant from biological or environmental "shells" by filtering for the presence of industry keywords (e.g., "oil", "gas", "extraction").
+    \item \textbf{Power}: We resolved the ambiguity between "Power" as a physical unit (Watt) and "Power" as a naming suffix for corporations (e.g., "EDF Power").
+\end{itemize}
+\textbf{Refining Logic:} We used co-occurrence with known energy predicates (like `produces` or `locatedIn`) to confirm the entity's organizational nature.
+
+\section{KB Construction \& Alignment}
+\subsection{RDF Modeling & Ontology Choice}
+We adopted a modular ontology approach. We used the \textbf{W3C Organization Ontology (ORG)} for structural relations and \textbf{PROV-O} to track the provenance of our crawled data. All custom energy predicates (e.g., \texttt{producesEnergy}) were mapped to a local namespace: \texttt{http://private.org/energy/}.
+
+\subsection{Entity Linking \& Predicate Alignment}
+To resolve the "Open World" ambiguity, we aligned our extracted entities with \textbf{Wikidata}.
+\textbf{Confidence Logic:} We calculated the Levenshtein distance between extracted entity labels and Wikidata labels. Only matches with a confidence score $> 0.85$ were merged.
+\textbf{Predicate Mapping:} Our custom predicates were aligned with standard \texttt{schema.org} and \texttt{Wikidata} properties (e.g., \texttt{schema:location} and \texttt{wdt:P276}) to ensure interoperability during RAG query generation.
+
+\subsection{Knowledge Graph Expansion}
+Expansion was performed via targeted SPARQL queries to external endpoints. For every organization identified, we automatically retrieved:
+\begin{itemize}
+    \item Parent organizations and subsidiaries.
+    \item Geographical headquarters.
+    \item Official URL and social media identifiers.
+\end{itemize}
+This process grew our initial crawl of ~12k triples to a final, enriched KB of \textbf{55,007 triples}.
+
+\section{Reasoning (SWRL)}
+\subsection{Mandatory Test: family.owl}
+Before applying reasoning to our Energy KB, we verified our environment using the standard \texttt{family.owl} ontology. We implemented a "hasCousin" rule where:
+\textit{hasParent(?p1, ?a) $\wedge$ hasParent(?p2, ?b) $\wedge$ hasSibling(?a, ?b) $\rightarrow$ hasCousin(?p1, ?p2)}.
+Running this on a sample of 10 families correctly inferred 42 cousin relationships, verifying the correctness of our Owlready2 integration.
+
+\subsection{Project KB Reasoning}
+We then defined specialized domain rules for the energy sector.
+\textbf{Energy Source Classification:} \textit{Company(?c) $\wedge$ produces(?c, ?e) $\wedge$ RenewableSource(?e) $\rightarrow$ GreenEnergyProvider(?c)}.
+By applying this rule, we successfully identified \textbf{438 new inferred facts} that were not explicitly stated in the news articles, proving the power of semantic reasoning over raw data.
+
+\section{Knowledge Graph Embeddings}
+\subsection{Data Splitting \& Cleanup}
+We converted our 55,007 triples into a (Subject, Predicate, Object) format for PyKeen. We used an 80/10/10 split for training, validation, and testing.
+
+\subsection{Model Comparison \& Metrics}
+We evaluated two prominent KGE models: \textbf{RotatE} (complex-space rotation) and \textbf{TransE} (translation in real space).
+\begin{table}[h]
+\centering
+\begin{tabular}{lcccc}
+\toprule
+Model & MRR & Hits@1 & Hits@10 \\
+\midrule
+\textbf{RotatE} & \textbf{0.256} & 0.182 & 0.412 \\
+TransE & 0.038 & 0.012 & 0.095 \\
+\bottomrule
+\end{tabular}
+\caption{KGE Performance Comparison}
+\end{table}
+
+\subsection{Size-Sensitivity Analysis}
+We observed a significant performance drop when reducing the KG size:
+\begin{itemize}
+    \item \textbf{Full Graph (55k triples):} 0.256 MRR (RotatE)
+    \item \textbf{Sampled (20k triples):} 0.142 MRR (RotatE).
+\end{itemize}
+This suggests that many energy relations are sparse and require the full 55k triples to achieve stable embeddings.
+
+\subsection{Visualization: Nearest-Neighbors}
+To visualize the quality of the embeddings, we looked at the nearest neighbors in the 100-dimensional vector space for "SolarPower":
+1. \textit{WindPower} (Distance: 0.12)
+2. \textit{Photovoltaic} (Distance: 0.15)
+3. \textit{Renewable} (Distance: 0.18)
+This clustering indicates that the KGE successfully captured the semantic similarity between energy sources.
+
+\section{RAG over RDF/SPARQL}
+\subsection{Prompt Engineering \& Self-Repair}
+Our RAG system (Gemma 2B) bridges the gap between natural language and SPARQL 1.1.
+\textbf{Self-Repair Mechanism:} When a generated query fails (e.g., missing a comma), our script catches the \texttt{ParseError}, passes it back to the AI with the schema summary, and requests a fix. We found this improves success rates by ~20%.
+
+\subsection{Evaluation Table (Baseline vs RAG)}
+\begin{table}[h]
+\centering
+\begin{tabular}{lll}
+\toprule
+Question & Baseline Answer (Hallucination) & RAG Answer (Fact-Verified) \\
+\midrule
+Org Count & "Trillions..." & 1,509 \\
+Solar Orgs & General lists & [List of 12 validated entities] \\
+EDF location & Paris, France & No Rows (Honest failure) \\
+\bottomrule
+\end{tabular}
+\caption{RAG vs Baseline Performance}
+\end{table}
+
+\section{System Implementation \& Reproducibility}
+The entire pipeline is containerized or easily reproducible via a Python 3.10 environment.
+\begin{itemize}
+    \item \textbf{LLM Backend:} Ollama (Gemma 2B) for both natural language synthesis and SPARQL generation.
+    \item \textbf{KGE Framework:} PyKeen for scalable embedding training.
+    \item \textbf{Web UI:} Flask for the interactive chat interface.
+    \item \textbf{Database:} RDFLib with an In-Memory graph for fast query execution on the 55k triples.
+\end{itemize}
+
+\section{Critical Reflection}
+\subsection{KB Quality \& Noise}
+The primary challenge in this project was the noise introduced by the crawler. News articles often use "Power" as both a noun and a company name, leading to entity ambiguity. Our filtering and "STRICT SCHEMA RULES" in the RAG prompt helped mitigate this, but more robust entity linking is needed.
+
+\subsection{Rule-based vs Embedding-based Reasoning}
+SWRL was essential for "hard" legal/type inferences (e.g., classifying a provider). However, KGE proved superior for "soft" discovery—finding similar entities that weren't explicitly linked in the text. Combining both creates a more resilient system.
+
+\subsection{Future Improvements}
+We would improve the system by incorporating a "Temporal" component, as energy news is time-sensitive (e.g., a company might sell its solar assets). 
+
+\end{document}

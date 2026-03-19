@@ -1,0 +1,5 @@
+private_relation,wikidata_property,frequency
+produce,wdt:P1056,3
+publish,wdt:P123,1
+use,wdt:P2283,1
+join,wdt:P463,1

@@ -1,0 +1,56 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+.Python
+*.egg-info/
+dist/
+build/
+*.egg
+
+# Virtual environments
+.venv/
+venv/
+env/
+
+# Jupyter
+.ipynb_checkpoints/
+*.ipynb_checkpoints
+
+# Data (large files — keep samples only)
+data/crawler_output.jsonl
+data/crawl_summary.csv
+data/extracted_knowledge.csv
+data/relation_candidates.csv
+data/entity_mapping.csv
+data/train.txt
+data/valid.txt
+data/test.txt
+
+# KGE model weights (large)
+src/kge/checkpoints/
+*.pt
+*.pkl
+
+# Ollama (managed separately)
+*.modelfile
+
+# OS
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# IDE
+.vscode/
+.idea/
+*.suo
+*.user
+
+# Reports (PDF — submit separately)
+reports/*.pdf
+
+# Temporary
+tmp/
+*.tmp
+*.log
