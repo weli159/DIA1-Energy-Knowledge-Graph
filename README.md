@@ -1,7 +1,7 @@
 # 🌱 Energy Knowledge Graph Pipeline & RAG Chatbot
 
 **Authors:** OUALI Youssef & SMASH Yassine  
-**Project:** Web Mining & Semantics (S2 - DIA4)  
+**Project:** Web Mining & Semantics (DIA1)  
 
 This project implements a complete Semantic Web pipeline: from crawling energy news to building a Knowledge Graph, performing SWRL reasoning, training Knowledge Graph Embeddings (KGE), and deploying a Retrieval-Augmented Generation (RAG) chatbot.
 
@@ -36,7 +36,7 @@ project-root/
 │  ├─ expanded.nt
 │  └─ alignment.ttl
 ├─ reports/
-│  └─ final_report.tex
+│  └─ project_report.pdf
 ├─ README.md
 ├─ requirements.txt
 └─ .gitignore
